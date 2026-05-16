@@ -261,8 +261,10 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--em);outline-offs
       <div class="emsg" id="emsg"><span>❌</span><span>Incorrect password. Please try again.</span></div>
     </div>
     <button class="lbtn" onclick="doLogin()">Login to Dashboard →</button>
+  
   </div>
 </div>
+
 <!-- DASHBOARD -->
 <div id="ds" class="screen">
   <div class="topbar">
@@ -503,70 +505,181 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--em);outline-offs
 </div>
 
 <script>
-// ══ CONFIG ══════════════════════════════════════════════
 const PASS = "bmaatelier2025";
-// This key is shared with index.html
-const STORAGE_KEY = "bma_products_v1";
+const SB_URL = "https://wufmbsiezvudhrxpzsun.supabase.co";
+const SB_KEY = "sb_publishable_LPYbu42kxUO_jCQcXCQswA_BNBOhuls";
 
-const CAT_COLORS = {
-  Clothing:"#0a3d2b",Bags:"#3d2b0a",Jewellery:"#0a2a3d",
-  Shoes:"#1a0a3d",Accessories:"#3d2b0a"
-};
+// ── Supabase helper ──────────────────────────────────────────────────
+async function sbFetch(path, opts={}) {
+  const res = await fetch(SB_URL + "/rest/v1/" + path, {
+    headers: {
+      "apikey": SB_KEY,
+      "Authorization": "Bearer " + SB_KEY,
+      "Content-Type": "application/json",
+      "Prefer": opts.prefer || "return=representation"
+    },
+    method: opts.method || "GET",
+    body: opts.body || undefined
+  });
+  const text = await res.text();
+  return text ? JSON.parse(text) : [];
+}
+
+const CAT_COLORS = {Clothing:"#0a3d2b",Bags:"#3d2b0a",Jewellery:"#0a2a3d",Shoes:"#1a0a3d",Accessories:"#3d2b0a"};
 
 const DEFAULTS = [
-  {id:1,name:"Silk Bias-Cut Midi Dress",cat:"Clothing",price:"£85",badge:"new",img:null},
-  {id:2,name:"Mini Structured Tote",cat:"Bags",price:"£68",badge:"new",img:null},
-  {id:3,name:"Layered Gold Choker Set",cat:"Jewellery",price:"£32",badge:"new",img:null},
-  {id:4,name:"Strappy Block Heel Sandal",cat:"Shoes",price:"£55",badge:"new",img:null},
-  {id:5,name:"Broderie Anglaise Co-ord",cat:"Clothing",price:"£95",badge:"new",img:null},
-  {id:6,name:"Beaded Evening Clutch",cat:"Bags",price:"£44",badge:"new",img:null},
-  {id:7,name:"Crystal Drop Earrings",cat:"Jewellery",price:"£24",badge:"new",img:null},
-  {id:8,name:"Patent Pointed Mule",cat:"Shoes",price:"£62",badge:"new",img:null},
-  {id:9,name:"Kaftan Maxi with Gold Trim",cat:"Clothing",price:"£120",badge:"none",img:null},
-  {id:10,name:"Asymmetric Wrap Dress",cat:"Clothing",price:"£78",badge:"none",img:null},
-  {id:11,name:"Tailored Wide-Leg Suit",cat:"Clothing",price:"£145",badge:"none",img:null},
-  {id:12,name:"Croc-Embossed Tote",cat:"Bags",price:"£98",badge:"none",img:null},
-  {id:13,name:"Chain-Strap Shoulder Bag",cat:"Bags",price:"£74",badge:"none",img:null},
-  {id:14,name:"Suede Bucket Bag",cat:"Bags",price:"£62",badge:"none",img:null},
-  {id:15,name:"Pearl & Gold Statement Set",cat:"Jewellery",price:"£45",badge:"none",img:null},
-  {id:16,name:"Emerald Green Beaded Set",cat:"Jewellery",price:"£38",badge:"none",img:null},
-  {id:17,name:"Strappy Kitten Heel",cat:"Shoes",price:"£48",badge:"none",img:null},
-  {id:18,name:"Embellished Platform Heel",cat:"Shoes",price:"£72",badge:"none",img:null},
-  {id:19,name:"Silk Printed Scarf",cat:"Accessories",price:"£25",badge:"none",img:null},
-  {id:20,name:"Gold Chain Belt",cat:"Accessories",price:"£32",badge:"none",img:null},
-  {id:21,name:"Sequin Corset Dress",cat:"Clothing",price:"£68",badge:"sale",img:null},
-  {id:22,name:"Leather Shoulder Bag",cat:"Bags",price:"£45",badge:"sale",img:null},
-  {id:23,name:"Crystal Statement Earrings",cat:"Jewellery",price:"£12",badge:"sale",img:null},
-  {id:24,name:"Strappy Heel Sandals",cat:"Shoes",price:"£32",badge:"sale",img:null},
+  {name:"Silk Bias-Cut Midi Dress",cat:"Clothing",price:"£85",badge:"new",img:null},
+  {name:"Mini Structured Tote",cat:"Bags",price:"£68",badge:"new",img:null},
+  {name:"Layered Gold Choker Set",cat:"Jewellery",price:"£32",badge:"new",img:null},
+  {name:"Strappy Block Heel Sandal",cat:"Shoes",price:"£55",badge:"new",img:null},
+  {name:"Broderie Anglaise Co-ord",cat:"Clothing",price:"£95",badge:"new",img:null},
+  {name:"Beaded Evening Clutch",cat:"Bags",price:"£44",badge:"new",img:null},
+  {name:"Crystal Drop Earrings",cat:"Jewellery",price:"£24",badge:"new",img:null},
+  {name:"Patent Pointed Mule",cat:"Shoes",price:"£62",badge:"new",img:null},
+  {name:"Kaftan Maxi with Gold Trim",cat:"Clothing",price:"£120",badge:"none",img:null},
+  {name:"Asymmetric Wrap Dress",cat:"Clothing",price:"£78",badge:"none",img:null},
+  {name:"Tailored Wide-Leg Suit",cat:"Clothing",price:"£145",badge:"none",img:null},
+  {name:"Croc-Embossed Tote",cat:"Bags",price:"£98",badge:"none",img:null},
+  {name:"Chain-Strap Shoulder Bag",cat:"Bags",price:"£74",badge:"none",img:null},
+  {name:"Suede Bucket Bag",cat:"Bags",price:"£62",badge:"none",img:null},
+  {name:"Pearl & Gold Statement Set",cat:"Jewellery",price:"£45",badge:"none",img:null},
+  {name:"Emerald Green Beaded Set",cat:"Jewellery",price:"£38",badge:"none",img:null},
+  {name:"Strappy Kitten Heel",cat:"Shoes",price:"£48",badge:"none",img:null},
+  {name:"Embellished Platform Heel",cat:"Shoes",price:"£72",badge:"none",img:null},
+  {name:"Silk Printed Scarf",cat:"Accessories",price:"£25",badge:"none",img:null},
+  {name:"Gold Chain Belt",cat:"Accessories",price:"£32",badge:"none",img:null},
+  {name:"Sequin Corset Dress",cat:"Clothing",price:"£68",badge:"sale",img:null},
+  {name:"Leather Shoulder Bag",cat:"Bags",price:"£45",badge:"sale",img:null},
+  {name:"Crystal Statement Earrings",cat:"Jewellery",price:"£12",badge:"sale",img:null},
+  {name:"Strappy Heel Sandals",cat:"Shoes",price:"£32",badge:"sale",img:null},
 ];
 
-// ══ STATE ═══════════════════════════════════════════════
+// ── STATE ────────────────────────────────────────────────────────────
 let prods = [];
 let editId = null, delId = null;
 let editImg = null, addImg = null;
 let editBadge = "none", addBadge = "none";
 
-// ══ STORAGE — shared key with index.html ════════════════
-function saveProd() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(prods)); } catch(e){}
-  showSaved();
-}
-function loadProd() {
+// ── LOAD / SAVE via Supabase ─────────────────────────────────────────
+async function loadProd() {
   try {
-    const d = localStorage.getItem(STORAGE_KEY);
-    prods = d ? JSON.parse(d) : JSON.parse(JSON.stringify(DEFAULTS));
-  } catch(e) { prods = JSON.parse(JSON.stringify(DEFAULTS)); }
+    showLoading(true);
+    const data = await sbFetch("products?select=*&order=id.asc");
+    if (data.length === 0) {
+      // First time — seed with defaults
+      await seedDefaults();
+    } else {
+      prods = data;
+    }
+  } catch(e) {
+    console.error("Load error:", e);
+    showToast("Could not connect to database. Check your internet.", "error");
+  } finally {
+    showLoading(false);
+  }
+}
+
+async function seedDefaults() {
+  try {
+    const inserted = await sbFetch("products", {
+      method: "POST",
+      body: JSON.stringify(DEFAULTS),
+      prefer: "return=representation"
+    });
+    prods = inserted;
+    showToast("Store initialised with default products!", "success");
+  } catch(e) {
+    console.error("Seed error:", e);
+  }
+}
+
+async function saveProd(p) {
+  // Update one product in Supabase
+  try {
+    await sbFetch(`products?id=eq.${p.id}`, {
+      method: "PATCH",
+      body: JSON.stringify({
+        name: p.name, cat: p.cat, price: p.price,
+        badge: p.badge, img: p.img
+      }),
+      prefer: "return=minimal"
+    });
+    showSaved();
+  } catch(e) {
+    showToast("Save failed: " + e.message, "error");
+  }
+}
+
+async function addProd(p) {
+  try {
+    const inserted = await sbFetch("products", {
+      method: "POST",
+      body: JSON.stringify([p]),
+      prefer: "return=representation"
+    });
+    prods.push(inserted[0]);
+    showSaved();
+  } catch(e) {
+    showToast("Add failed: " + e.message, "error");
+  }
+}
+
+async function deleteProd(id) {
+  try {
+    await sbFetch(`products?id=eq.${id}`, {
+      method: "DELETE",
+      prefer: "return=minimal"
+    });
+    prods = prods.filter(p => p.id !== id);
+    showSaved();
+  } catch(e) {
+    showToast("Delete failed: " + e.message, "error");
+  }
+}
+
+async function resetProds() {
+  if (!confirm("Reset all products to defaults? All images will be lost. Cannot be undone.")) return;
+  try {
+    // Delete all
+    await sbFetch("products?id=gt.0", { method: "DELETE", prefer: "return=minimal" });
+    prods = [];
+    await seedDefaults();
+    renderAll();
+    showToast("Products reset to defaults!", "success");
+  } catch(e) {
+    showToast("Reset failed: " + e.message, "error");
+  }
+}
+
+function exportProds() {
+  const a = document.createElement("a");
+  a.href = "data:application/json," + encodeURIComponent(JSON.stringify(prods, null, 2));
+  a.download = "bma-products.json"; a.click();
+}
+
+// ── LOADING STATE ────────────────────────────────────────────────────
+function showLoading(on) {
+  const g = document.getElementById("pgrid");
+  if (on && g) g.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--muted)"><div style="font-size:32px;margin-bottom:12px">⏳</div><div style="font-size:14px;color:var(--em)">Loading products from database...</div></div>`;
+}
+
+function showToast(msg, type="success") {
+  const t = document.createElement("div");
+  t.style.cssText = `position:fixed;top:80px;right:24px;z-index:9999;padding:14px 22px;font-size:12px;font-weight:600;letter-spacing:1px;box-shadow:0 4px 20px rgba(0,0,0,.2);animation:fadeIn .3s ease;max-width:320px;`;
+  t.style.background = type === "error" ? "#c0392b" : "var(--gold)";
+  t.style.color = type === "error" ? "#fff" : "var(--black)";
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
 }
 
 let savedT;
 function showSaved() {
   const b = document.getElementById("saved-b");
-  b.classList.add("on");
-  clearTimeout(savedT);
-  savedT = setTimeout(()=>b.classList.remove("on"), 2500);
+  if (b) { b.classList.add("on"); clearTimeout(savedT); savedT = setTimeout(()=>b.classList.remove("on"), 2500); }
 }
 
-// ══ LOGIN ════════════════════════════════════════════════
+// ── LOGIN ────────────────────────────────────────────────────────────
 function togglePw() {
   const i=document.getElementById("pwi"), e=document.getElementById("pweye");
   i.type=i.type==="password"?"text":"password";
@@ -579,12 +692,9 @@ function doLogin() {
   if(pw===PASS){
     document.getElementById("ls").classList.remove("on");
     document.getElementById("ds").classList.add("on");
-    loadProd(); renderAll();
+    loadProd().then(()=>renderAll());
   } else {
     inp.classList.add("err"); em.classList.add("on");
-    document.querySelector(".lbox").style.animation="none";
-    document.querySelector(".lbox").offsetHeight;
-    document.querySelector(".lbox").style.animation="shake .4s ease";
     inp.value="";
     setTimeout(()=>inp.classList.remove("err"),1500);
   }
@@ -596,7 +706,7 @@ function doLogout() {
   document.getElementById("emsg").classList.remove("on");
 }
 
-// ══ TABS ═════════════════════════════════════════════════
+// ── TABS ─────────────────────────────────────────────────────────────
 function showTab(name,btn) {
   document.querySelectorAll(".tab").forEach(t=>t.classList.remove("on"));
   document.querySelectorAll(".tc").forEach(t=>t.classList.remove("on"));
@@ -605,7 +715,7 @@ function showTab(name,btn) {
   if(name==="analytics") renderAnalytics();
 }
 
-// ══ RENDER ═══════════════════════════════════════════════
+// ── RENDER ───────────────────────────────────────────────────────────
 function renderAll() { renderStats(); renderProds(); }
 
 function renderStats() {
@@ -641,11 +751,7 @@ function renderProds() {
   }
   document.getElementById("pgrid").innerHTML=vis.map(p=>{
     const bg=CAT_COLORS[p.cat]||"#0a3d2b";
-    const imgH=p.img
-      ?`<img src="${p.img}" alt="${esc(p.name)}"/>`
-      :`<div class="pph" style="background:linear-gradient(160deg,${bg},${bg}aa,${bg}44)">
-          <div class="pi">📷</div><div class="pt">No Image</div><div class="pt2">Click to add</div>
-        </div>`;
+    const imgH=p.img?`<img src="${p.img}" alt="${esc(p.name)}"/>`:`<div class="pph" style="background:linear-gradient(160deg,${bg},${bg}aa,${bg}44)"><div class="pi">📷</div><div class="pt">No Image</div><div class="pt2">Click to add</div></div>`;
     const bdgH=p.badge!=="none"?`<div class="pbadge ${p.badge}">${p.badge==="new"?"New":"Sale"}</div>`:"";
     return `
       <div class="pcard" onclick="openEdit(${p.id})">
@@ -671,7 +777,7 @@ function renderProds() {
   }).join("");
 }
 
-// ══ EDIT ═════════════════════════════════════════════════
+// ── EDIT ─────────────────────────────────────────────────────────────
 function openEdit(id) {
   const p=prods.find(x=>x.id===id); if(!p) return;
   editId=id; editImg=p.img; editBadge=p.badge||"none";
@@ -679,21 +785,20 @@ function openEdit(id) {
   document.getElementById("edit-name").value=p.name;
   document.getElementById("edit-price").value=p.price;
   document.getElementById("edit-cat").value=p.cat;
-  setBadge("edit",editBadge);
-  setDZ("edit",p.img);
-  upPrev("edit");
+  setBadge("edit",editBadge); setDZ("edit",p.img); upPrev("edit");
   document.getElementById("edit-mov").classList.add("on");
 }
-function saveEdit() {
+async function saveEdit() {
   const p=prods.find(x=>x.id===editId); if(!p) return;
   p.name=document.getElementById("edit-name").value||p.name;
   p.price=document.getElementById("edit-price").value||p.price;
   p.cat=document.getElementById("edit-cat").value;
   p.badge=editBadge; p.img=editImg;
-  saveProd(); renderAll(); closeMov("edit-mov");
+  await saveProd(p);
+  renderAll(); closeMov("edit-mov");
 }
 
-// ══ ADD ══════════════════════════════════════════════════
+// ── ADD ──────────────────────────────────────────────────────────────
 function openAdd() {
   addImg=null; addBadge="none";
   document.getElementById("add-name").value="";
@@ -702,55 +807,42 @@ function openAdd() {
   setBadge("add","none"); setDZ("add",null);
   document.getElementById("add-mov").classList.add("on");
 }
-function saveAdd() {
+async function saveAdd() {
   const name=document.getElementById("add-name").value.trim();
   const price=document.getElementById("add-price").value.trim();
   if(!name||!price||price==="£"){alert("Please enter a product name and price.");return;}
-  const nextId=prods.length?Math.max(...prods.map(p=>p.id))+1:1;
-  prods.push({id:nextId,name,cat:document.getElementById("add-cat").value,price,badge:addBadge,img:addImg});
-  saveProd(); renderAll(); closeMov("add-mov");
+  await addProd({name,cat:document.getElementById("add-cat").value,price,badge:addBadge,img:addImg});
+  renderAll(); closeMov("add-mov");
 }
 
-// ══ DELETE ═══════════════════════════════════════════════
+// ── DELETE ───────────────────────────────────────────────────────────
 function openDel(id) {
   const p=prods.find(x=>x.id===id); if(!p) return;
   delId=id;
   document.getElementById("del-name").textContent=p.name;
   document.getElementById("del-mov").classList.add("on");
 }
-function confirmDel() {
-  prods=prods.filter(p=>p.id!==delId);
-  saveProd(); renderAll(); closeMov("del-mov");
+async function confirmDel() {
+  await deleteProd(delId);
+  renderAll(); closeMov("del-mov");
 }
 
-// ══ MODALS ═══════════════════════════════════════════════
+// ── MODALS ───────────────────────────────────────────────────────────
 function closeMov(id){document.getElementById(id).classList.remove("on");}
 document.querySelectorAll(".mov").forEach(o=>{
   o.addEventListener("click",function(e){if(e.target===this)this.classList.remove("on");});
 });
 
-// ══ DROPZONE ═════════════════════════════════════════════
+// ── DROPZONE ─────────────────────────────────────────────────────────
 function setDZ(pfx,src) {
   const dz=document.getElementById(pfx+"-dz");
   const rm=document.getElementById(pfx+"-rmbtn");
-  if(src){
-    dz.className="dz hasimg";
-    dz.innerHTML=`<img src="${src}" alt="preview"/>`;
-    if(rm)rm.style.display="block";
-  } else {
-    dz.className="dz";
-    dz.innerHTML=`<div class="dzi"><div class="di">🖼️</div><div class="dt">Click or drag & drop image</div><div class="ds">JPG, PNG, WEBP supported</div></div>`;
-    if(rm)rm.style.display="none";
-  }
+  if(src){dz.className="dz hasimg";dz.innerHTML=`<img src="${src}" alt="preview"/>`;if(rm)rm.style.display="block";}
+  else{dz.className="dz";dz.innerHTML=`<div class="dzi"><div class="di">🖼️</div><div class="dt">Click or drag & drop image</div><div class="ds">JPG, PNG, WEBP supported</div></div>`;if(rm)rm.style.display="none";}
 }
 function dzOver(e,id){e.preventDefault();document.getElementById(id).classList.add("drag");}
 function dzLeave(id){document.getElementById(id).classList.remove("drag");}
-function dzDrop(e,dzId,pfx){
-  e.preventDefault();
-  document.getElementById(dzId).classList.remove("drag");
-  const f=e.dataTransfer.files[0];
-  if(f&&f.type.startsWith("image/"))loadImg(f,pfx);
-}
+function dzDrop(e,dzId,pfx){e.preventDefault();document.getElementById(dzId).classList.remove("drag");const f=e.dataTransfer.files[0];if(f&&f.type.startsWith("image/"))loadImg(f,pfx);}
 function fileChosen(e,pfx){const f=e.target.files[0];if(f)loadImg(f,pfx);}
 function loadImg(file,pfx){
   const r=new FileReader();
@@ -768,7 +860,7 @@ function removeImg(pfx){
   document.getElementById(pfx+"-fi").value="";
 }
 
-// ══ BADGE BUTTONS ════════════════════════════════════════
+// ── BADGE BUTTONS ────────────────────────────────────────────────────
 function setBadge(pfx,val){
   if(pfx==="edit")editBadge=val; else addBadge=val;
   ["none","new","sale"].forEach(b=>{
@@ -779,7 +871,7 @@ function setBadge(pfx,val){
   if(pfx==="edit")upPrev("edit");
 }
 
-// ══ LIVE PREVIEW ═════════════════════════════════════════
+// ── LIVE PREVIEW ─────────────────────────────────────────────────────
 function upPrev(pfx){
   const name=document.getElementById(pfx+"-name").value||"Product Name";
   const price=document.getElementById(pfx+"-price").value||"£00";
@@ -791,16 +883,12 @@ function upPrev(pfx){
   document.getElementById(pfx+"-prevname").textContent=name;
   document.getElementById(pfx+"-prevprice").textContent=price;
   const th=document.getElementById(pfx+"-prevthumb");
-  th.innerHTML=img
-    ?`<img src="${img}" alt=""/>`
-    :`<div class="prevph" style="background:linear-gradient(160deg,${bg},${bg}88)"></div>`;
+  th.innerHTML=img?`<img src="${img}" alt=""/>`:`<div class="prevph" style="background:linear-gradient(160deg,${bg},${bg}88)"></div>`;
   const be=document.getElementById(pfx+"-prevbadge");
-  be.innerHTML=badge!=="none"
-    ?`<div class="prevbadge" style="background:${badge==="new"?"#0a3d2b":"#c0392b"};color:#fff">${badge==="new"?"New":"Sale"}</div>`
-    :"";
+  be.innerHTML=badge!=="none"?`<div class="prevbadge" style="background:${badge==="new"?"#0a3d2b":"#c0392b"};color:#fff">${badge==="new"?"New":"Sale"}</div>`:"";
 }
 
-// ══ ANALYTICS ════════════════════════════════════════════
+// ── ANALYTICS ────────────────────────────────────────────────────────
 function renderAnalytics(){
   const cats=["Clothing","Bags","Jewellery","Shoes","Accessories"];
   document.getElementById("catbars").innerHTML=cats.map(cat=>{
@@ -808,11 +896,7 @@ function renderAnalytics(){
     const withImg=prods.filter(p=>p.cat===cat&&p.img).length;
     const pct=prods.length?Math.round(total/prods.length*100):0;
     const bg=CAT_COLORS[cat]||"#0a3d2b";
-    return `<div class="cbar">
-      <div class="cbar-top"><span class="cbar-name">${cat}</span><span class="cbar-cnt">${withImg}/${total} with images</span></div>
-      <div class="cbar-track"><div class="cbar-fill" style="width:${pct}%;background:${bg}"></div></div>
-      <div class="cbar-pct">${total} products (${pct}%)</div>
-    </div>`;
+    return `<div class="cbar"><div class="cbar-top"><span class="cbar-name">${cat}</span><span class="cbar-cnt">${withImg}/${total} with images</span></div><div class="cbar-track"><div class="cbar-fill" style="width:${pct}%;background:${bg}"></div></div><div class="cbar-pct">${total} products (${pct}%)</div></div>`;
   }).join("");
   const wi=prods.filter(p=>p.img).length;
   const pct=prods.length?Math.round(wi/prods.length*100):0;
@@ -821,42 +905,13 @@ function renderAnalytics(){
   document.getElementById("progsub").textContent=`${wi} of ${prods.length} products have images`;
   const miss=prods.filter(p=>!p.img);
   const ml=document.getElementById("misslist");
-  if(miss.length){
-    ml.style.display="block";
-    document.getElementById("missitems").innerHTML=miss.map(p=>`
-      <div class="miss-item" onclick="switchToEdit(${p.id})">
-        <span style="color:var(--red)">•</span>
-        <span>${esc(p.name)}</span>
-        <span class="mi-cat">(${p.cat})</span>
-        <span class="mi-edit">Edit →</span>
-      </div>`).join("");
-  } else ml.style.display="none";
+  if(miss.length){ml.style.display="block";document.getElementById("missitems").innerHTML=miss.map(p=>`<div class="miss-item" onclick="switchToEdit(${p.id})"><span style="color:var(--red)">•</span><span>${esc(p.name)}</span><span class="mi-cat">(${p.cat})</span><span class="mi-edit">Edit →</span></div>`).join("");}
+  else ml.style.display="none";
 }
-function switchToEdit(id){
-  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("on"));
-  document.querySelectorAll(".tc").forEach(t=>t.classList.remove("on"));
-  document.querySelector(".tab").classList.add("on");
-  document.getElementById("tc-products").classList.add("on");
-  openEdit(id);
-}
+function switchToEdit(id){document.querySelectorAll(".tab").forEach(t=>t.classList.remove("on"));document.querySelectorAll(".tc").forEach(t=>t.classList.remove("on"));document.querySelector(".tab").classList.add("on");document.getElementById("tc-products").classList.add("on");openEdit(id);}
 
-// ══ SETTINGS ═════════════════════════════════════════════
-function resetProds(){
-  if(confirm("Reset all products to defaults? All uploaded images will be lost. This cannot be undone.")){
-    prods=JSON.parse(JSON.stringify(DEFAULTS));
-    saveProd(); renderAll(); alert("Products reset to defaults.");
-  }
-}
-function exportProds(){
-  const a=document.createElement("a");
-  a.href="data:application/json,"+encodeURIComponent(JSON.stringify(prods,null,2));
-  a.download="bma-products.json"; a.click();
-}
-
-// ══ UTIL ═════════════════════════════════════════════════
+// ── UTIL ─────────────────────────────────────────────────────────────
 function esc(s){return(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
-
-// Focus password field on load
 window.addEventListener("load",()=>document.getElementById("pwi").focus());
 </script>
 </body>
