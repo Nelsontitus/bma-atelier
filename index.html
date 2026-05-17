@@ -327,6 +327,15 @@ footer{background:var(--black);padding:56px 64px 28px;border-top:3px solid var(-
   .fr{grid-template-columns:1fr!important;}
   .chc h1{font-size:34px!important;}
 }
+
+/* DELUXE HAVEN STYLE - Scrollable category pills */
+.cat-pills{background:var(--white);border-bottom:2px solid var(--border);overflow-x:auto;display:flex;padding:0;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.cat-pills::-webkit-scrollbar{display:none;}
+.cat-pill{flex-shrink:0;padding:13px 20px;font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--em);cursor:pointer;white-space:nowrap;border-bottom:2.5px solid transparent;transition:all .2s;background:none;border-top:none;border-left:none;border-right:none;}
+.cat-pill:hover{color:var(--gold3);background:var(--cream);}
+.cat-pill.on{color:var(--gold3);border-bottom-color:var(--gold);background:var(--cream);}
+.cat-pill.sale-pill{color:#c0392b;}
+
 </style>
 </head>
 <body>
@@ -369,6 +378,11 @@ footer{background:var(--black);padding:56px 64px 28px;border-top:3px solid var(-
     <div class="sb-link">&#x21A9;&#xFE0F; &nbsp;Returns &amp; Refunds <span style="margin-left:auto">&#x203A;</span></div>
     <div class="sb-link">&#x1F4CF; &nbsp;Size Guide <span style="margin-left:auto">&#x203A;</span></div>
     <div class="sb-link">&#x2753; &nbsp;FAQs <span style="margin-left:auto">&#x203A;</span></div>
+  </div>
+  <div class="sb-div"></div>
+  <div class="sb-sec">
+    <div class="sb-sec-lbl">Admin</div>
+    <div class="sb-link" onclick="window.location.href='admin.html'">&#x1F510; &nbsp;Admin Dashboard <span style="margin-left:auto">&#x203A;</span></div>
   </div>
   <div class="sb-contact">
     <p>Get in Touch</p>
@@ -472,6 +486,19 @@ footer{background:var(--black);padding:56px 64px 28px;border-top:3px solid var(-
   <a data-p="sale" class="sl" onclick="gp('sale')">&#x1F3F7;&#xFE0F; Sale</a>
   <a data-p="contact" onclick="gp('contact')">Contact</a>
 </nav>
+<!-- DELUXE HAVEN STYLE CATEGORY PILLS -->
+<div class="cat-pills" id="cat-pills">
+  <button class="cat-pill on" onclick="gp('home');setPill(this)">All</button>
+  <button class="cat-pill" onclick="gp('newarrivals');setPill(this)">&#x2728; New Arrivals</button>
+  <button class="cat-pill" onclick="gp('clothes');setPill(this)">&#x1F457; Clothing</button>
+  <button class="cat-pill" onclick="gp('bags');setPill(this)">&#x1F45C; Bags</button>
+  <button class="cat-pill" onclick="gp('jewellery');setPill(this)">&#x1F48E; Jewellery</button>
+  <button class="cat-pill" onclick="gp('shoes');setPill(this)">&#x1F460; Shoes</button>
+  <button class="cat-pill" onclick="gp('accessories');setPill(this)">&#x1F9E3; Accessories</button>
+  <button class="cat-pill sale-pill" onclick="gp('sale');setPill(this)">&#x1F3F7;&#xFE0F; Sale</button>
+  <button class="cat-pill" onclick="gp('contact');setPill(this)">&#x2709;&#xFE0F; Contact</button>
+</div>
+
 
 <!-- HOME PAGE -->
 <div class="pg on" id="pg-home">
@@ -604,133 +631,30 @@ footer{background:var(--black);padding:56px 64px 28px;border-top:3px solid var(-
 var SB_URL="https://wufmbsiezvudhrxpzsun.supabase.co",SB_KEY="sb_publishable_LPYbu42kxUO_jCQcXCQswA_BNBOhuls",STRIPE_PK="pk_test_51TVtciFVPFMQNCGnEWeeV0FKVXs1YSMQXrSKKk6iwsroJprVTZELbu18MGnGFJJMT1Pfb2MkARJByJTbKPFxh6kC00SBUMg1Bw";
 var CAT_COLORS={Clothing:"#0a3d2b",Bags:"#3d2b0a",Jewellery:"#0a2a3d",Shoes:"#1a0a3d",Accessories:"#3d2b0a"};
 var allProds=[],cart=[];
-
 async function sbGet(p){var r=await fetch(SB_URL+"/rest/v1/"+p,{headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}});var t=await r.text();return t?JSON.parse(t):[];}
-
-function mkCard(p){
-  var bg=CAT_COLORS[p.cat]||"#0a3d2b";
-  var imgH=p.img?'<img src="'+p.img+'" alt="'+esc(p.name)+'"/>':'<div class="pph" style="background:linear-gradient(160deg,'+bg+','+bg+'aa)">&#x1F4F7;</div>';
-  var bdgH=p.badge&&p.badge!=="none"?'<div class="pbdg '+p.badge+'">'+(p.badge==="new"?"New":"Sale")+'</div>':"";
-  var nn=p.name.replace(/'/g,"\'");
-  return '<div class="pcard"><div class="pimg">'+imgH+bdgH+'<div class="pacts"><button class="atcb" onclick="addCart(''+nn+'',''+p.price+'',''+bg+'')">Add to Bag</button><button class="wshb">&#x2661;</button></div></div><div class="pcat">'+p.cat+'</div><div class="pname sf">'+esc(p.name)+'</div><div class="ppr"><span class="pcu">'+p.price+'</span></div></div>';
-}
-
+function mkCard(p){var bg=CAT_COLORS[p.cat]||"#0a3d2b";var imgH=p.img?'<img src="'+p.img+'" alt="'+esc(p.name)+'"/>':'<div class="pph" style="background:linear-gradient(160deg,'+bg+','+bg+'aa)">&#x1F4F7;</div>';var bdgH=p.badge&&p.badge!=="none"?'<div class="pbdg '+p.badge+'">'+(p.badge==="new"?"New":"Sale")+'</div>':"";var nn=p.name.replace(/'/g,"\'");return '<div class="pcard"><div class="pimg">'+imgH+bdgH+'<div class="pacts"><button class="atcb" onclick="addCart(''+nn+'',''+p.price+'',''+bg+'')">Add to Bag</button><button class="wshb">&#x2661;</button></div></div><div class="pcat">'+p.cat+'</div><div class="pname sf">'+esc(p.name)+'</div><div class="ppr"><span class="pcu">'+p.price+'</span></div></div>';}
 var rendered={};
-async function renderGrid(page){
-  if(rendered[page])return;rendered[page]=true;
-  var catMap={newarrivals:allProds.filter(function(p){return p.badge==="new";}),clothes:allProds.filter(function(p){return p.cat==="Clothing";}),bags:allProds.filter(function(p){return p.cat==="Bags";}),jewellery:allProds.filter(function(p){return p.cat==="Jewellery";}),shoes:allProds.filter(function(p){return p.cat==="Shoes";}),accessories:allProds.filter(function(p){return p.cat==="Accessories";}),sale:allProds.filter(function(p){return p.badge==="sale";})}; 
-  var items=catMap[page]||[];
-  var grid=document.getElementById("grid-"+page),cnt=document.getElementById("cnt-"+page);
-  if(grid)grid.innerHTML=items.length?items.map(mkCard).join(""):'<div style="grid-column:1/-1;text-align:center;padding:60px"><div style="font-size:40px;margin-bottom:14px">&#x1F6CD;&#xFE0F;</div><div style="font-family:Cormorant Garamond,serif;font-size:24px;color:#0a3d2b;margin-bottom:8px">Coming Soon</div><div style="font-size:13px;color:#4a7a5a">Products will appear here once added via the <a href="admin.html" style="color:#0a3d2b;font-weight:700">Admin Dashboard</a>.</div></div>';
-  if(cnt)cnt.textContent=items.length+" Product"+(items.length!==1?"s":"")+" Available";
-  var filt=document.getElementById("filt-"+page);
-  if(filt&&!filt.innerHTML){var cats=[...new Set(items.map(function(p){return p.cat;}))];filt.innerHTML='<div class="fg2"><h6>Category</h6>'+cats.map(function(c){return '<label><input type="checkbox" checked/> '+c+'</label>';}).join("")+'</div><div class="fg2"><h6>Price Range</h6><label><input type="checkbox"/> Under £50</label><label><input type="checkbox"/> £50–£150</label><label><input type="checkbox"/> Above £150</label></div>';}
-  var pf=document.querySelector("#pg-"+page+" .pf");
-  if(pf&&!pf.innerHTML)pf.innerHTML=document.getElementById("mf").outerHTML;
-}
-
-function renderHome(){
-  var items=allProds.filter(function(p){return p.badge==="new";}).slice(0,8);
-  var grid=document.getElementById("home-grid");
-  if(!grid)return;
-  grid.innerHTML=items.length?items.map(mkCard).join(""):'<div style="grid-column:1/-1;text-align:center;padding:50px"><div style="font-size:40px;margin-bottom:12px">&#x1F6CD;&#xFE0F;</div><div style="font-family:Cormorant Garamond,serif;font-size:22px;color:#0a3d2b;margin-bottom:8px">No Products Yet</div><div style="font-size:13px;color:#4a7a5a">Visit the <a href="admin.html" style="color:#0a3d2b;font-weight:700">Admin Dashboard</a> to add products.</div></div>';
-}
-
-async function loadAndRender(){
-  try{allProds=await sbGet("products?select=*&order=id.asc");}catch(e){console.error("Load error:",e);allProds=[];}
-  renderHome();
-}
-
+async function renderGrid(page){if(rendered[page])return;rendered[page]=true;var catMap={newarrivals:allProds.filter(function(p){return p.badge==="new";}),clothes:allProds.filter(function(p){return p.cat==="Clothing";}),bags:allProds.filter(function(p){return p.cat==="Bags";}),jewellery:allProds.filter(function(p){return p.cat==="Jewellery";}),shoes:allProds.filter(function(p){return p.cat==="Shoes";}),accessories:allProds.filter(function(p){return p.cat==="Accessories";}),sale:allProds.filter(function(p){return p.badge==="sale";})};var items=catMap[page]||[];var grid=document.getElementById("grid-"+page),cnt=document.getElementById("cnt-"+page);if(grid)grid.innerHTML=items.length?items.map(mkCard).join(""):'<div style="grid-column:1/-1;text-align:center;padding:60px"><div style="font-size:40px;margin-bottom:14px">&#x1F6CD;&#xFE0F;</div><div style="font-family:Cormorant Garamond,serif;font-size:24px;color:#0a3d2b;margin-bottom:8px">Coming Soon</div><div style="font-size:13px;color:#4a7a5a">Products will appear here once added via the <a href="admin.html" style="color:#0a3d2b;font-weight:700">Admin Dashboard</a>.</div></div>';if(cnt)cnt.textContent=items.length+" Product"+(items.length!==1?"s":"")+" Available";var filt=document.getElementById("filt-"+page);if(filt&&!filt.innerHTML){var cats=[...new Set(items.map(function(p){return p.cat;}))];filt.innerHTML='<div class="fg2"><h6>Category</h6>'+cats.map(function(c){return '<label><input type="checkbox" checked/> '+c+'</label>';}).join("")+'</div><div class="fg2"><h6>Price Range</h6><label><input type="checkbox"/> Under £50</label><label><input type="checkbox"/> £50–£150</label><label><input type="checkbox"/> Above £150</label></div>';}var pf=document.querySelector("#pg-"+page+" .pf");if(pf&&!pf.innerHTML)pf.innerHTML=document.getElementById("mf").outerHTML;}
+function renderHome(){var items=allProds.filter(function(p){return p.badge==="new";}).slice(0,8);var grid=document.getElementById("home-grid");if(!grid)return;grid.innerHTML=items.length?items.map(mkCard).join(""):'<div style="grid-column:1/-1;text-align:center;padding:50px"><div style="font-size:40px;margin-bottom:12px">&#x1F6CD;&#xFE0F;</div><div style="font-family:Cormorant Garamond,serif;font-size:22px;color:#0a3d2b;margin-bottom:8px">No Products Yet</div><div style="font-size:13px;color:#4a7a5a">Visit the <a href="admin.html" style="color:#0a3d2b;font-weight:700">Admin Dashboard</a> to add products.</div></div>';}
+async function loadAndRender(){try{allProds=await sbGet("products?select=*&order=id.asc");}catch(e){console.error("Load error:",e);allProds=[];}renderHome();}
 function addCart(name,price,color){cart.push({name:name,price:price,color:color});upCart();cOpen();}
-function upCart(){
-  var n=cart.length;
-  document.getElementById("cnum").textContent=n;document.getElementById("hbg").textContent=n;
-  var de=document.getElementById("cde"),df=document.getElementById("cdf"),ci=document.getElementById("cit");
-  if(!n){de.style.display="block";df.style.display="none";ci.innerHTML="";}
-  else{de.style.display="none";df.style.display="block";
-    ci.innerHTML=cart.map(function(i){return '<div style="display:flex;gap:14px;margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid #b8d5c5"><div style="width:68px;height:86px;background:linear-gradient(160deg,'+i.color+','+i.color+'88);flex-shrink:0"></div><div><div style="font-family:Cormorant Garamond,serif;font-size:16px;color:#0a3d2b;margin-bottom:5px;font-weight:600">'+i.name+'</div><div style="font-size:13px;color:#9a7a2f;font-weight:700">'+i.price+'</div></div></div>';}).join("");
-    document.getElementById("ctot").textContent="£"+cart.reduce(function(s,i){return s+parseInt(i.price.replace(/[^0-9]/g,""));},0);
-  }
-}
+function upCart(){var n=cart.length;document.getElementById("cnum").textContent=n;document.getElementById("hbg").textContent=n;var de=document.getElementById("cde"),df=document.getElementById("cdf"),ci=document.getElementById("cit");if(!n){de.style.display="block";df.style.display="none";ci.innerHTML="";}else{de.style.display="none";df.style.display="block";ci.innerHTML=cart.map(function(i){return '<div style="display:flex;gap:14px;margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid #b8d5c5"><div style="width:68px;height:86px;background:linear-gradient(160deg,'+i.color+','+i.color+'88);flex-shrink:0"></div><div><div style="font-family:Cormorant Garamond,serif;font-size:16px;color:#0a3d2b;margin-bottom:5px;font-weight:600">'+i.name+'</div><div style="font-size:13px;color:#9a7a2f;font-weight:700">'+i.price+'</div></div></div>';}).join("");document.getElementById("ctot").textContent="£"+cart.reduce(function(s,i){return s+parseInt(i.price.replace(/[^0-9]/g,""));},0);}}
 function cOpen(){document.getElementById("cd").classList.add("on");document.getElementById("cov").classList.add("on");}
 function cClose(){document.getElementById("cd").classList.remove("on");document.getElementById("cov").classList.remove("on");}
-
 var si=0;
 function gs(n){document.getElementById("s"+si).classList.remove("on");document.querySelectorAll(".dot")[si].classList.remove("on");si=n;document.getElementById("s"+si).classList.add("on");document.querySelectorAll(".dot")[si].classList.add("on");}
 setInterval(function(){gs((si+1)%3);},5500);
-
 function toggleSB(){document.getElementById("sidebar").classList.toggle("open");document.getElementById("sbovl").classList.toggle("open");document.getElementById("hambtn").classList.toggle("open");}
 function closeSB(){document.getElementById("sidebar").classList.remove("open");document.getElementById("sbovl").classList.remove("open");document.getElementById("hambtn").classList.remove("open");}
-
-function gp(name){
-  document.querySelectorAll(".pg").forEach(function(p){p.classList.remove("on");});
-  document.getElementById("pg-"+name).classList.add("on");
-  document.querySelectorAll("#topnav a").forEach(function(a){a.classList.remove("on");});
-  var na=document.querySelector("#topnav a[data-p='"+name+"']");if(na)na.classList.add("on");
-  document.querySelectorAll(".sb-link").forEach(function(l){l.classList.remove("act");});
-  var sl=document.getElementById("sl-"+name);if(sl)sl.classList.add("act");
-  window.scrollTo({top:0,behavior:"smooth"});
-  if(name!=="home"&&name!=="contact")renderGrid(name);
-}
-
+function setPill(el){document.querySelectorAll(".cat-pill").forEach(function(p){p.classList.remove("on");});if(el)el.classList.add("on");}
+function gp(name){document.querySelectorAll(".pg").forEach(function(p){p.classList.remove("on");});document.getElementById("pg-"+name).classList.add("on");document.querySelectorAll("#topnav a").forEach(function(a){a.classList.remove("on");});var na=document.querySelector("#topnav a[data-p='"+name+"']");if(na)na.classList.add("on");document.querySelectorAll(".sb-link").forEach(function(l){l.classList.remove("act");});var sl=document.getElementById("sl-"+name);if(sl)sl.classList.add("act");window.scrollTo({top:0,behavior:"smooth"});if(name!=="home"&&name!=="contact")renderGrid(name);}
 function esc(s){return(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
-
-// STRIPE CHECKOUT
 var _stripe,_cardEl;
-function initStripe(){
-  if(_stripe)return;
-  _stripe=Stripe(STRIPE_PK);
-  var els=_stripe.elements();
-  _cardEl=els.create("card",{style:{base:{fontFamily:"Montserrat,sans-serif",fontSize:"13px",color:"#0d1f17","::placeholder":{color:"#aab7b8"}},invalid:{color:"#c0392b"}}});
-  _cardEl.mount("#card-element");
-  _cardEl.on("focus",function(){document.getElementById("card-element").parentElement.classList.add("focused");});
-  _cardEl.on("blur",function(){document.getElementById("card-element").parentElement.classList.remove("focused");});
-}
-
-function openCheckout(){
-  if(!cart.length){alert("Your bag is empty!");return;}
-  var itemsEl=document.getElementById("co-items");
-  itemsEl.innerHTML=cart.map(function(i){return '<div class="co-item"><span class="ci-name">'+i.name+'</span><span class="ci-price">'+i.price+'</span></div>';}).join("");
-  var total=cart.reduce(function(s,i){return s+parseInt(i.price.replace(/[^0-9]/g,""));},0);
-  document.getElementById("co-total-amt").textContent="£"+total;
-  document.getElementById("co-pay-label").textContent="Pay £"+total+" Now";
-  document.getElementById("co-success").classList.remove("on");
-  document.getElementById("co-form").style.display="block";
-  document.getElementById("co-err").classList.remove("on");
-  document.getElementById("co-ovl").classList.add("on");
-  setTimeout(initStripe,150);
-}
-
+function initStripe(){if(_stripe)return;_stripe=Stripe(STRIPE_PK);var els=_stripe.elements();_cardEl=els.create("card",{style:{base:{fontFamily:"Montserrat,sans-serif",fontSize:"13px",color:"#0d1f17","::placeholder":{color:"#aab7b8"}},invalid:{color:"#c0392b"}}});_cardEl.mount("#card-element");_cardEl.on("focus",function(){document.getElementById("card-element").parentElement.classList.add("focused");});_cardEl.on("blur",function(){document.getElementById("card-element").parentElement.classList.remove("focused");});}
+function openCheckout(){if(!cart.length){alert("Your bag is empty!");return;}var itemsEl=document.getElementById("co-items");itemsEl.innerHTML=cart.map(function(i){return '<div class="co-item"><span class="ci-name">'+i.name+'</span><span class="ci-price">'+i.price+'</span></div>';}).join("");var total=cart.reduce(function(s,i){return s+parseInt(i.price.replace(/[^0-9]/g,""));},0);document.getElementById("co-total-amt").textContent="£"+total;document.getElementById("co-pay-label").textContent="Pay £"+total+" Now";document.getElementById("co-success").classList.remove("on");document.getElementById("co-form").style.display="block";document.getElementById("co-err").classList.remove("on");document.getElementById("co-ovl").classList.add("on");setTimeout(initStripe,150);}
 function closeCheckout(){document.getElementById("co-ovl").classList.remove("on");}
-
-document.addEventListener("DOMContentLoaded",function(){
-  var ovl=document.getElementById("co-ovl");
-  if(ovl)ovl.addEventListener("click",function(e){if(e.target===this)closeCheckout();});
-});
-
-async function submitPayment(){
-  var fname=document.getElementById("co-fname").value.trim();
-  var lname=document.getElementById("co-lname").value.trim();
-  var email=document.getElementById("co-email").value.trim();
-  var phone=document.getElementById("co-phone").value.trim();
-  var addr1=document.getElementById("co-addr1").value.trim();
-  var city=document.getElementById("co-city").value.trim();
-  var post=document.getElementById("co-post").value.trim();
-  if(!fname||!lname||!email||!addr1||!city||!post){showCoErr("Please fill in all required fields *");return;}
-  if(!email.includes("@")){showCoErr("Please enter a valid email address");return;}
-  var btn=document.getElementById("co-pay-btn");
-  btn.disabled=true;
-  btn.innerHTML="&#x23F3; Processing your payment...";
-  var result=await _stripe.createPaymentMethod({type:"card",card:_cardEl,billing_details:{name:fname+" "+lname,email:email,phone:phone,address:{line1:addr1,line2:document.getElementById("co-addr2").value.trim(),city:city,postal_code:post,country:"GB"}}});
-  if(result.error){
-    showCoErr(result.error.message);
-    btn.disabled=false;
-    btn.innerHTML='&#x1F512; &nbsp;<span id="co-pay-label">Pay Now</span>';
-    return;
-  }
-  var total=cart.reduce(function(s,i){return s+parseInt(i.price.replace(/[^0-9]/g,""));},0);
-  var items=cart.map(function(i){return i.name+" "+i.price;}).join(", ");
-  var waMsg=encodeURIComponent("NEW ORDER from BMA Atelier Website!
+document.addEventListener("DOMContentLoaded",function(){var ovl=document.getElementById("co-ovl");if(ovl)ovl.addEventListener("click",function(e){if(e.target===this)closeCheckout();});var covl=document.getElementById("cov");if(covl)covl.addEventListener("click",cClose);});
+async function submitPayment(){var fname=document.getElementById("co-fname").value.trim(),lname=document.getElementById("co-lname").value.trim(),email=document.getElementById("co-email").value.trim(),phone=document.getElementById("co-phone").value.trim(),addr1=document.getElementById("co-addr1").value.trim(),city=document.getElementById("co-city").value.trim(),post=document.getElementById("co-post").value.trim();if(!fname||!lname||!email||!addr1||!city||!post){showCoErr("Please fill in all required fields *");return;}if(!email.includes("@")){showCoErr("Please enter a valid email address");return;}var btn=document.getElementById("co-pay-btn");btn.disabled=true;btn.innerHTML="&#x23F3; Processing...";var result=await _stripe.createPaymentMethod({type:"card",card:_cardEl,billing_details:{name:fname+" "+lname,email:email,phone:phone,address:{line1:addr1,line2:document.getElementById("co-addr2").value.trim(),city:city,postal_code:post,country:"GB"}}});if(result.error){showCoErr(result.error.message);btn.disabled=false;btn.innerHTML='&#x1F512; &nbsp;<span id="co-pay-label">Pay Now</span>';return;}var total=cart.reduce(function(s,i){return s+parseInt(i.price.replace(/[^0-9]/g,""));},0);var items=cart.map(function(i){return i.name+" "+i.price;}).join(", ");var waMsg=encodeURIComponent("NEW ORDER from BMA Atelier!
 
 Customer: "+fname+" "+lname+"
 Email: "+email+"
@@ -738,14 +662,8 @@ Phone: "+phone+"
 Address: "+addr1+", "+city+", "+post+"
 
 Items: "+items+"
-TOTAL: £"+total);
-  document.getElementById("co-form").style.display="none";
-  document.getElementById("co-success").classList.add("on");
-  cart=[];upCart();
-  setTimeout(function(){window.open("https://wa.me/447828421131?text="+waMsg,"_blank");},1500);
-}
+TOTAL: £"+total);document.getElementById("co-form").style.display="none";document.getElementById("co-success").classList.add("on");cart=[];upCart();setTimeout(function(){window.open("https://wa.me/447828421131?text="+waMsg,"_blank");},1500);}
 function showCoErr(msg){var e=document.getElementById("co-err");e.textContent=msg;e.classList.add("on");}
-
 loadAndRender();
 
 </script>
